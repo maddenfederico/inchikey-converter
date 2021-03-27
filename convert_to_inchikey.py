@@ -7,22 +7,23 @@ import sys
 import requests
 from requests import HTTPError
 
-input_file = sys.argv[1]
 
-with open(input_file, 'r') as f:
-    input_compounds = f.read().splitlines()
+def convert_to_inchikey(input_file):
 
-for compound in input_compounds:
-    try:
-        response = requests.get(f"https://cactus.nci.nih.gov/chemical/structure/{compound}/stdinchikey")
-        response.raise_for_status()
-        print(f"{compound}\t{response.text.partition('=')[2]}")
-    except HTTPError:
-        print(f"{compound}\t0")
+    input_compounds = input_file.read().splitlines()
+    output = []
+    for compound in input_compounds:
+        try:
+            response = requests.get(f"https://cactus.nci.nih.gov/chemical/structure/{compound}/stdinchikey")
+            response.raise_for_status()
+            output.append(f"{compound}\t{response.text.partition('=')[2]}")
+        except HTTPError:
+            output.append(f"{compound}\t0")
 
-
-
-
+    return output
 
 
-
+if __name__ == "__main__":
+    input_path = sys.argv[1]
+    with open(input_path, 'r') as f:
+        print('\n'.join(convert_to_inchikey(f)))
